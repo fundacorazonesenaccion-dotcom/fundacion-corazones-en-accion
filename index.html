@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E5FA8">
+<link rel="manifest" href="/manifest.webmanifest">
+<title>Corazones en Acción</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --green: #1E5FA8; --green-dark: #12406E; --cream: #F5F9FD; --cream2: #EAF3FC;
+    --rust: #D62839; --ink: #1F2421; --muted: #5B6670; --line: #D7E6F5; --white: #FFFFFF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    font-family: 'Work Sans', -apple-system, sans-serif; color: var(--ink);
+    background-color: #F5F9FD;
+    background-image: linear-gradient(rgba(245,249,253,0.93), rgba(245,249,253,0.93)), none;
+    background-repeat: repeat, repeat;
+    background-size: auto, 45px 80px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', serif; margin: 0; }
+  p { margin: 0; }
+  a { color: var(--rust); text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* App bar */
+  .appbar {
+    flex-shrink: 0; background: var(--green); color: #fff; display: flex; align-items: center;
+    gap: 10px; padding: 14px 20px; padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  .appbar .logo { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.18); flex-shrink: 0; }
+  .appbar .title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; }
+
+  /* Views */
+  main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .view { display: none; padding: 20px 20px 32px; max-width: 560px; margin: 0 auto; }
+  .view.active { display: block; }
+  .back-link { display: inline-block; font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 14px; }
+
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--rust); margin-bottom: 6px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .card-flat { background: var(--cream2); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .btn { display: block; width: 100%; text-align: center; padding: 14px 18px; border-radius: 10px; font-weight: 600; font-size: 15px; }
+  .btn-primary { background: var(--rust); color: #fff; }
+  .btn-primary:active { background: #7C3616; }
+  .btn-outline { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+  .btn-outline:active { background: var(--cream2); }
+  .btn-print { background: transparent; color: var(--muted); border: 1.5px dashed var(--line); }
+  .btn-print:active { background: var(--cream2); }
+  .btn-sm { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; }
+  .tag { display: inline-block; background: var(--cream2); color: var(--green); font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 14px; margin: 2px 4px 2px 0; }
+  input, select, textarea {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; font-family: 'Work Sans', sans-serif; margin-top: 6px; background: #fff; color: var(--ink);
+  }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+  .field-hint { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .checkline { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; margin: 14px 0; }
+  .checkline input { width: auto; margin: 0; }
+  .site-link { font-size: 12.5px; color: var(--green); font-weight: 600; display: inline-block; margin-top: 8px; }
+  .social-row { display: flex; gap: 10px; margin-bottom: 18px; }
+  .social-row a { flex: 1; text-align: center; }
+
+  /* Bottom nav */
+  nav.tabbar {
+    flex-shrink: 0; display: flex; background: #fff; border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  nav.tabbar button {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 2px 8px; color: var(--muted); font-size: 10.5px; font-weight: 600;
+  }
+  nav.tabbar button.active { color: var(--green); }
+  nav.tabbar svg { width: 21px; height: 21px; }
+
+  /* Chat mock preview on Agente screen */
+  .bubble { border-radius: 12px; padding: 10px 14px; font-size: 13.5px; max-width: 82%; margin-bottom: 8px; }
+  .bubble.in { background: #fff; border-bottom-left-radius: 2px; align-self: flex-start; }
+  .bubble.out { background: var(--green); color: #fff; border-bottom-right-radius: 2px; align-self: flex-end; margin-left: auto; }
+  .chatmock { display: flex; flex-direction: column; }
+
+  /* Donation tiers */
+  .tier { border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .tier-white { background: #fff; border: 1px solid var(--line); }
+  .tier-green { background: var(--green); color: #fff; }
+  .tier .amount { font-family: 'Fraunces', serif; font-weight: 700; font-size: 19px; }
+  .tier .desc { font-size: 12.5px; margin-top: 2px; }
+  .tier-green .desc { color: #E3F1E8; }
+  .tier-white .desc { color: var(--muted); }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --cream: #0F1F35; --cream2: #16283F; --ink: #F0EEE7; --muted: #93A0B5; --line: #24354F; --white: #16283F;
+    }
+    body {
+      background-color: #0F1F35;
+      background-image: linear-gradient(rgba(15,31,53,0.93), rgba(15,31,53,0.93)), none;
+      background-repeat: repeat, repeat;
+      background-size: auto, 45px 80px;
+    }
+    .card { background: #16283F; border-color: var(--line); }
+    input, select, textarea { background: #16283F; color: var(--ink); border-color: var(--line); }
+    nav.tabbar { background: #16283F; }
+  }
+  :root[data-theme="dark"] {
+    --cream: #0F1F35; --cream2: #16283F; --ink: #F0EEE7; --muted: #93A0B5; --line: #24354F; --white: #16283F;
+  }
+
+  /* Imprimir / Guardar como PDF */
+  @media print {
+    body * { visibility: hidden; }
+    .print-target, .print-target * { visibility: visible; }
+    .print-target { position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+    .appbar, nav.tabbar, .no-print { display: none !important; }
+    body { background: #fff !important; overflow: visible !important; }
+    main { overflow: visible !important; }
+  }
+</style>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#1e5fa8"></head>
+<body>
+
+  <div class="appbar">
+    <span role="img" aria-label="Corazones en Acción" style="display:inline-grid;place-items:center;width:28px;height:28px;flex-shrink:0;font-size:23px">♥</span>
+    <div class="title">Corazones en Acción</div>
+  </div>
+
+  <main id="main">
+
+    <!-- INICIO -->
+    <section class="view active" id="view-inicio">
+      <div class="eyebrow">CON SEDE EN MEDELLÍN · COLOMBIA Y EL MUNDO</div>
+      <h1 style="font-size:26px; line-height:1.2; margin-bottom:10px;">Te acompañamos en tu proceso migratorio</h1>
+      <p style="color:var(--muted); font-size:14.5px; line-height:1.6; margin-bottom:18px;">Orientación legal, integración social y acompañamiento económico para personas migrantes y refugiadas, con especial atención a la población venezolana. Con sede en Medellín, apoyamos a cualquier persona migrante en Colombia o en el resto del mundo que lo necesite.</p>
+      <button class="btn btn-primary" onclick="showView('agente')" style="margin-bottom:20px;">Hablar con nuestro agente</button>
+
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <div class="card" style="flex:1; text-align:center; margin-bottom:0; padding:14px 8px;">
+          <div style="font-family:'Fraunces',serif; font-weight:700; font-size:20px; color:var(--green);">5</div>
+          <div style="font-size:11.5px; color:var(--muted);">líneas de acción</div>
+        </div>
+        <div class="card" style="flex:1; text-align:center; margin-bottom:0; padding:14px 8px;">
+          <div style="font-family:'Fraunces',serif; font-weight:700; font-size:20px; color:#D62839;">$0</div>
+          <div style="font-size:11.5px; color:var(--muted);">costo para ti</div>
+        </div>
+        <div class="card" style="flex:1; text-align:center; margin-bottom:0; padding:14px 8px;">
+          <div style="font-family:'Fraunces',serif; font-weight:700; font-size:20px; color:#F5A623;">24/7</div>
+          <div style="font-size:11.5px; color:var(--muted);">por WhatsApp</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px; margin-bottom:10px;">Accesos rápidos</h3>
+      <div class="card" onclick="showView('programas')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+        <div><strong style="font-size:14.5px;">Nuestros programas</strong><div class="field-hint">Las 5 líneas de trabajo</div></div>
+        <span style="color:var(--muted);">›</span>
+      </div>
+      <div class="card" onclick="showView('reportar')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+        <div><strong style="font-size:14.5px;">Reportar una situación</strong><div class="field-hint">Aunque no sea para ti — puede ser anónimo</div></div>
+        <span style="color:var(--muted);">›</span>
+      </div>
+      <div class="card" onclick="showView('mas')" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-bottom:0;">
+        <div><strong style="font-size:14.5px;">Donar o ser voluntario</strong><div class="field-hint">Sé parte del cambio</div></div>
+        <span style="color:var(--muted);">›</span>
+      </div>
+    </section>
+
+    <!-- PROGRAMAS -->
+    <section class="view" id="view-programas">
+      <h1 style="font-size:22px; margin-bottom:4px;">Nuestras líneas de acción</h1>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:18px;">Toca cualquier línea para escribirnos directamente sobre ese tema.</p>
+
+      <div class="card">
+        <div class="eyebrow">LÍNEA 1 · DESARROLLO SOCIAL</div>
+        <h3 style="font-size:16px; margin-bottom:6px;">Ruta de Bienvenida</h3>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.5; margin-bottom:10px;">Diagnóstico e integración socioeconómica de familias recién llegadas, con referenciación a rutas de atención existentes: acompañamiento a quienes migraron solos y dejaron familia en Venezuela, y apoyo a quienes llevan más tiempo en Colombia en situación irregular.</p>
+        <a class="btn btn-outline btn-sm" href="#" target="_blank" rel="noopener noreferrer" data-wa-topic="Ruta de Bienvenida (Línea 1)">Escribir sobre esto</a>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">LÍNEA 2 · DEMOCRACIA Y LIBERTADES</div>
+        <h3 style="font-size:16px; margin-bottom:6px;">Ciudadanía Activa</h3>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.5; margin-bottom:10px;">Talleres de formación cívica y educación democrática: derechos y deberes en Colombia, convivencia y participación comunitaria con la comunidad de acogida.</p>
+        <a class="btn btn-outline btn-sm" href="#" target="_blank" rel="noopener noreferrer" data-wa-topic="Ciudadanía Activa (Línea 2)">Escribir sobre esto</a>
+      </div>
+
+      <div class="card" style="background:var(--green); border-color:var(--green); color:#fff;">
+        <div class="eyebrow" style="color:#BFE0CC;">LÍNEA 3 · JUSTICIA</div>
+        <h3 style="font-size:16px; margin-bottom:6px; color:#fff;">Orientación Legal Migrante</h3>
+        <p style="font-size:13.5px; color:#E3F1E8; line-height:1.5; margin-bottom:10px;">Brigadas jurídicas y un agente de IA por WhatsApp para regularización migratoria y derechos laborales, convalidación de títulos profesionales, y orientación a empresas sobre contratación de migrantes.</p>
+        <a class="btn btn-sm" style="background:#fff; color:var(--green);" href="#" target="_blank" rel="noopener noreferrer" data-wa-topic="Orientación Legal Migrante (Línea 3)">Escribir sobre esto</a>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">LÍNEA 4 · EMPRENDIMIENTO</div>
+        <h3 style="font-size:16px; margin-bottom:6px;">Estabilización Económica</h3>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.5; margin-bottom:10px;">Formación, acompañamiento técnico e inclusión financiera para negocios liderados por población migrante, con énfasis en mujeres cabeza de familia. Incluye ferias laborales en alianza con actores locales.</p>
+        <a class="btn btn-outline btn-sm" href="#" target="_blank" rel="noopener noreferrer" data-wa-topic="Estabilización Económica (Línea 4)">Escribir sobre esto</a>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <div class="eyebrow">LÍNEA 5 · IDENTIDAD E INVESTIGACIÓN</div>
+        <h3 style="font-size:16px; margin-bottom:6px;">Observatorio Migratorio</h3>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.5;">El motor de métricas de la Fundación: documenta el impacto social y económico de la migración en el territorio de acogida, con informes trimestrales públicos — descárgalos desde la sección "Más".</p>
+      </div>
+    </section>
+
+    <!-- AGENTE -->
+    <section class="view" id="view-agente">
+      <div class="eyebrow">ATENCIÓN INMEDIATA</div>
+      <h1 style="font-size:22px; margin-bottom:10px;">Habla con nuestro agente</h1>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:16px;">Te orienta al instante y, si lo necesitas, radica tu caso para que un abogado de la Fundación te dé seguimiento — sin repetir tu historia desde cero. Toda la información se trata de forma confidencial conforme a la Ley 1581 de 2012.</p>
+
+      <div class="card-flat chatmock" style="margin-bottom:18px;">
+        <div class="bubble in">Hola, necesito ayuda con mi Permiso por Protección Temporal.</div>
+        <div class="bubble out">Claro, con gusto te oriento. Cuéntame en qué paso del trámite estás.</div>
+        <div class="bubble in">Ya hice el registro pero no sé qué documentos me faltan.</div>
+        <div class="bubble out">Tu caso quedó radicado con el número <strong>#0000</strong> — un abogado te contactará.</div>
+      </div>
+
+      <a class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer" id="wa-agente-btn" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.38 17.06L2 22L7.06 20.65C8.5 21.5 10.19 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="white" stroke-width="1.6"/><path d="M8.5 8.5C8.5 8.5 9 8 10 10C10.6 11.2 11.5 12 12.5 12.8C13.5 13.6 14.3 14 15.2 14.5C16.5 15.2 16 14 16 14L15 12.8C15 12.8 15.5 12.3 16.5 13C17.2 13.5 17.5 14 17.5 14.5C17.5 15.3 16.8 16.3 16 16.5C15 16.8 13.8 16.6 11.8 15.5C9.5 14.2 8 12 7.5 10.8C7.1 9.9 7.3 9 8.5 8.5Z" fill="white"/></svg>
+        Iniciar conversación por WhatsApp
+      </a>
+      <p style="font-size:12px; color:var(--muted); text-align:center; margin-top:10px;">Es gratuito. No necesitas estar regularizado para escribirnos.</p>
+
+      <div class="card" style="margin-top:18px; margin-bottom:0;">
+        <strong style="font-size:14.5px;">¿Tu empresa quiere contratar población migrante?</strong>
+        <p class="field-hint" style="margin-top:4px;">Orientamos a equipos de Recursos Humanos sobre el marco legal para contratar personas con Permiso por Protección Temporal (PPT) o Permiso Especial de Permanencia (PEP), y sobre las obligaciones de cumplimiento normativo asociadas. También referenciamos candidatos ya orientados por nuestra Línea de Justicia.</p>
+        <a class="btn btn-outline btn-sm" style="margin-top:10px;" href="#" target="_blank" rel="noopener noreferrer" data-wa-topic="Orientación a empresas sobre contratación de migrantes">Escribir sobre esto</a>
+      </div>
+    </section>
+
+    <!-- REPORTAR -->
+    <section class="view" id="view-reportar">
+      <div class="eyebrow">¿NO ES PARA TI?</div>
+      <h1 style="font-size:22px; margin-bottom:8px;">Reporta una situación</h1>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:18px;">Una familia en riesgo, discriminación, una necesidad de tu comunidad. Completa lo que sepas — puedes dejarlo anónimo.</p>
+
+      <form id="report-form" class="print-target">
+        <label>Tipo de situación
+          <select id="rep-tipo">
+            <option>Familia o persona en riesgo</option>
+            <option>Discriminación o xenofobia</option>
+            <option>Necesidad comunitaria no cubierta</option>
+            <option>Emergencia</option>
+            <option>Oportunidad de alianza</option>
+            <option>Otro</option>
+          </select>
+        </label>
+        <label>¿Qué está pasando?
+          <textarea id="rep-desc" rows="4" placeholder="Cuéntanos con el detalle que tengas"></textarea>
+        </label>
+        <label>Ubicación aproximada
+          <input id="rep-ubicacion" type="text" placeholder="Barrio o zona de Medellín">
+        </label>
+        <label class="checkline no-print" style="font-weight:600;">
+          <input type="checkbox" id="rep-anonimo" onchange="toggleAnon()"> Quiero mantenerme anónimo
+        </label>
+        <label id="rep-nombre-wrap">Tu nombre (opcional)
+          <input id="rep-nombre" type="text" placeholder="Nombre y apellido">
+        </label>
+        <button type="button" class="btn btn-primary no-print" onclick="sendReport()" style="margin-top:6px;">Enviar reporte por WhatsApp</button>
+        <button type="button" class="btn btn-print no-print" onclick="printForm('report-form')" style="margin-top:10px;">🖨️ Imprimir / Guardar como PDF</button>
+        <p style="font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px;" class="no-print">Se abrirá WhatsApp con tu reporte ya redactado — solo debes confirmar el envío. Confirma el envío en WhatsApp; el registro en el panel requiere conexión con el servidor.</p>
+      </form>
+    </section>
+
+    <!-- MÁS -->
+    <section class="view" id="view-mas">
+      <h1 style="font-size:22px; margin-bottom:16px;">Más</h1>
+
+      <h3 style="font-size:15px; margin-bottom:10px;">Hazte padrino o madrina</h3>
+      <p class="field-hint" style="margin-bottom:10px;">Un aporte mensual nos permite planear cada línea de trabajo con continuidad.</p>
+      <div class="tier tier-white">
+        <div><div class="amount">$20.000<span style="font-size:12px; font-weight:500;">/mes</span></div><div class="desc">Una consulta de orientación legal</div></div>
+        <button class="btn btn-outline btn-sm" onclick="openDonar('$20.000', 'Cubre una consulta de orientación legal en la Línea de Justicia.')">Donar</button>
+      </div>
+      <div class="tier tier-green">
+        <div><div class="amount">$50.000<span style="font-size:12px; font-weight:500;">/mes</span></div><div class="desc">Un kit de bienvenida completo</div></div>
+        <button class="btn btn-sm" style="background:#fff; color:var(--green);" onclick="openDonar('$50.000', 'Financia un kit de bienvenida completo para una familia recién llegada.')">Donar</button>
+      </div>
+      <div class="tier tier-white" style="margin-bottom:10px;">
+        <div><div class="amount">$100.000<span style="font-size:12px; font-weight:500;">/mes</span></div><div class="desc">Un mes de talleres para un grupo</div></div>
+        <button class="btn btn-outline btn-sm" onclick="openDonar('$100.000', 'Sostiene un mes completo de talleres de Ciudadanía Activa para un grupo.')">Donar</button>
+      </div>
+      <a class="btn btn-outline btn-sm" style="width:100%; text-align:center; margin-bottom:18px;" href="https://vaki.co/es/vaki/corazones-en-acci-n-donde-el-amor-se-convierte-en-ayuda" target="_blank" rel="noopener noreferrer">Donar por Vaki ↗</a>
+
+      <div class="card" onclick="showView('voluntario')" style="cursor:pointer;">
+        <strong style="font-size:14.5px;">Sé voluntario</strong>
+        <p class="field-hint" style="margin-top:4px;">Constancia oficial de horas, experiencia real en campo y comunidad. Postúlate directamente desde la app.</p>
+      </div>
+
+      <div class="card">
+        <strong style="font-size:14.5px;">Informe del Observatorio Migratorio</strong>
+        <p class="field-hint" style="margin-top:4px; margin-bottom:10px;">Informe Cero — línea base institucional, previa al primer trimestre de operación: metodología, indicadores y hoja de ruta hacia el Informe Trimestral N.° 1.</p>
+        <p class="field-hint">Documento PDF pendiente de incorporar al sitio publicado.</p>
+      </div>
+
+      <div class="card">
+        <strong style="font-size:14.5px;">Transparencia y gobernanza</strong>
+        <p class="field-hint" style="margin-top:4px;">Cada decisión y cada alianza queda documentada: actas de cada sesión de Junta Directiva, convenios interinstitucionales formalizados por escrito, comunicados oficiales con fecha y autoría, y consentimiento informado por escrito antes de publicar cualquier foto, video o testimonio.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <strong style="font-size:14.5px;">Marco internacional y alianzas</strong>
+        <p class="field-hint" style="margin-top:4px;">Alineamos nuestro trabajo con los estándares de ACNUR, OIM, OIT, UNICEF, OEA, la Oficina de la ONU para los Derechos Humanos y la Unión Europea, buscando fortalecer la cooperación internacional en cada línea de acción.</p>
+      </div>
+
+      <h3 style="font-size:15px; margin:18px 0 10px;">Síguenos</h3>
+      <div class="social-row">
+        <a class="btn btn-outline btn-sm" href="https://www.instagram.com/fundacorazonesenaccion/" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram">Instagram</a>
+        <a class="btn btn-outline btn-sm" href="https://www.tiktok.com/@fundacorazonesenaccion" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en TikTok">TikTok</a>
+        <a class="btn btn-outline btn-sm" href="https://www.facebook.com/profile.php?id=61594706320831" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Facebook">Facebook</a>
+      </div>
+
+      <div class="card" onclick="abrirEnlaceNuevo('/')" style="cursor:pointer;">
+        <strong style="font-size:14.5px;">Ver el sitio completo</strong>
+        <p class="field-hint" style="margin-top:4px;">Historias reales, aliados internacionales, galería y más</p>
+      </div>
+
+      <div class="card-flat" style="margin-bottom:0;">
+        <strong style="font-size:14px;">Fundación Corazones en Acción</strong>
+        <p style="font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.6;">
+          Con sede en Medellín, Colombia · al servicio de Colombia y el mundo<br>
+          Representante legal: Miguel Ramírez Santos<br>
+          <a href="mailto:fundacorazonesenaccion@gmail.com">fundacorazonesenaccion@gmail.com</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- DONAR (formulario de apadrinamiento) -->
+    <section class="view" id="view-donar-form">
+      <a class="back-link no-print" href="#" onclick="showView('mas'); return false;">← Volver</a>
+      <div class="eyebrow">COMPROMISO DE APADRINAMIENTO</div>
+      <h1 style="font-size:22px; margin-bottom:8px;">Hazte padrino/madrina — <span id="donar-amount-label">$20.000</span>/mes</h1>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:6px;" id="donar-desc-label">Cubre una consulta de orientación legal en la Línea de Justicia.</p>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:18px;">Completa tus datos y te escribiremos para coordinar el medio de pago (Nequi, PSE o transferencia bancaria) y enviarte el documento de compromiso para firmar.</p>
+
+      <form id="donar-form" class="print-target" onsubmit="return false;">
+        <input type="hidden" id="donar-amount-hidden" value="$20.000/mes">
+        <label>Nombre completo
+          <input id="donar-nombre" required type="text">
+        </label>
+        <label>Correo
+          <input id="donar-correo" required type="email">
+        </label>
+        <label>Teléfono / WhatsApp
+          <input id="donar-tel" required type="tel">
+        </label>
+        <label>Método de pago preferido
+          <select id="donar-pago" required>
+            <option value="">Selecciona una opción</option>
+            <option value="Nequi">Nequi</option>
+            <option value="PSE o transferencia bancaria">PSE o transferencia bancaria</option>
+            <option value="Tarjeta de crédito/débito (Vaki)">Tarjeta de crédito/débito (Vaki)</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </label>
+        <label>Mensaje (opcional)
+          <textarea id="donar-msg" rows="3"></textarea>
+        </label>
+        <button type="button" class="btn btn-primary no-print" onclick="enviarDonar()" style="margin-top:6px;">Enviar mi compromiso</button>
+        <button type="button" class="btn btn-print no-print" onclick="printForm('donar-form')" style="margin-top:10px;">🖨️ Imprimir / Guardar como PDF</button>
+        <p id="donar-estado" class="no-print" style="font-size:12.5px; text-align:center; margin-top:10px;"></p>
+        <p style="font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px;" class="no-print">¿Quieres una copia para tus archivos? Imprime o guarda este formulario como PDF antes de enviarlo.</p>
+      </form>
+    </section>
+
+    <!-- VOLUNTARIO (formulario de postulación) -->
+    <section class="view" id="view-voluntario">
+      <a class="back-link no-print" href="#" onclick="showView('mas'); return false;">← Volver</a>
+      <div class="eyebrow">SÉ VOLUNTARIO</div>
+      <h1 style="font-size:22px; margin-bottom:8px;">Postúlate como voluntario/a</h1>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:18px;">Completa tus datos y te escribiremos para contarte las oportunidades activas según tu perfil y disponibilidad.</p>
+
+      <form id="voluntario-form" class="print-target" onsubmit="return false;">
+        <label>Nombre completo
+          <input id="vol-nombre" required type="text">
+        </label>
+        <label>Correo
+          <input id="vol-correo" required type="email">
+        </label>
+        <label>Teléfono / WhatsApp
+          <input id="vol-tel" required type="tel">
+        </label>
+        <label>Perfil de interés
+          <select id="vol-perfil" required>
+            <option value="">Selecciona una opción</option>
+            <option value="Acompañamiento social">Acompañamiento social</option>
+            <option value="Talleristas en derechos">Talleristas en derechos</option>
+            <option value="Estudiante de derecho">Estudiante de derecho</option>
+            <option value="Mentoría de negocio">Mentoría de negocio</option>
+            <option value="Datos y Observatorio">Datos y Observatorio</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </label>
+        <label>Disponibilidad
+          <select id="vol-disp" required>
+            <option value="">Selecciona una opción</option>
+            <option value="Pocas horas a la semana">Pocas horas a la semana</option>
+            <option value="Medio tiempo">Medio tiempo</option>
+            <option value="Proyecto puntual">Proyecto puntual</option>
+            <option value="Flexible / por definir">Flexible / por definir</option>
+          </select>
+        </label>
+        <label>Cuéntanos de ti (opcional)
+          <textarea id="vol-msg" rows="3" placeholder="Experiencia previa, motivación, requisito de horas..."></textarea>
+        </label>
+        <button type="button" class="btn btn-primary no-print" onclick="enviarVoluntario()" style="margin-top:6px;">Enviar postulación</button>
+        <button type="button" class="btn btn-print no-print" onclick="printForm('voluntario-form')" style="margin-top:10px;">🖨️ Imprimir / Guardar como PDF</button>
+        <p id="voluntario-estado" class="no-print" style="font-size:12.5px; text-align:center; margin-top:10px;"></p>
+        <p style="font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px;" class="no-print">¿Quieres una copia para tus archivos? Imprime o guarda este formulario como PDF antes de enviarlo.</p>
+      </form>
+    </section>
+
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab active" data-view="inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11L12 4l9 7"/><path d="M5 10v10h14V10"/></svg>
+      Inicio
+    </button>
+    <button class="tab" data-view="programas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+      Programas
+    </button>
+    <button class="tab" data-view="agente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Agente
+    </button>
+    <button class="tab" data-view="reportar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      Reportar
+    </button>
+    <button class="tab" data-view="mas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+      Más
+    </button>
+  </nav>
+
+<script>
+  var WA_NUMBER = "573046632626";
+
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.tab').forEach(function(t){
+      t.classList.toggle('active', t.getAttribute('data-view') === name);
+    });
+    document.getElementById('main').scrollTop = 0;
+  }
+
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click', function(){ showView(btn.getAttribute('data-view')); });
+  });
+
+  function waLink(text) {
+    return "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(text);
+  }
+
+  document.querySelectorAll('[data-wa-topic]').forEach(function(a){
+    var topic = a.getAttribute('data-wa-topic');
+    a.href = waLink("Hola, quiero información sobre: " + topic);
+  });
+
+  document.getElementById('wa-agente-btn').href = waLink("Hola, necesito orientación.");
+
+  function toggleAnon() {
+    var anon = document.getElementById('rep-anonimo').checked;
+    document.getElementById('rep-nombre-wrap').style.display = anon ? 'none' : 'block';
+    if (anon) document.getElementById('rep-nombre').value = '';
+  }
+
+  function sendReport() {
+    var tipo = document.getElementById('rep-tipo').value;
+    var desc = document.getElementById('rep-desc').value.trim();
+    var ubic = document.getElementById('rep-ubicacion').value.trim();
+    var anon = document.getElementById('rep-anonimo').checked;
+    var nombre = document.getElementById('rep-nombre').value.trim();
+
+    if (!desc) {
+      alert("Cuéntanos brevemente qué está pasando antes de enviar.");
+      return;
+    }
+
+    var lines = [
+      "REPORTE COMUNITARIO — Corazones en Acción",
+      "Tipo: " + tipo,
+      "Descripción: " + desc,
+      ubic ? ("Ubicación aproximada: " + ubic) : null,
+      anon ? "El reportante desea mantenerse anónimo." : (nombre ? ("Nombre: " + nombre) : "Nombre: no indicado")
+    ].filter(Boolean);
+
+    // Queda también registrado en el panel (además de ir por WhatsApp),
+    // en segundo plano: si esto falla, el envío por WhatsApp de abajo
+    // sigue funcionando igual, que es el canal principal de este formulario.
+    enviarSolicitud({
+      tipo: "reporte_caso",
+      origen: "APP",
+      nombre: anon ? "" : nombre,
+      "Tipo de situación": tipo,
+      "Descripción": desc,
+      "Ubicación aproximada": ubic,
+      "Anónimo": anon ? "Sí" : "No"
+    }).catch(function(){ alert("No fue posible guardar el reporte en el panel. Puedes continuar con el envío por WhatsApp, pero confirma su recepción con la Fundación."); });
+
+    abrirEnlaceNuevo(waLink(lines.join("\n")));
+  }
+
+  function abrirEnlaceNuevo(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function openDonar(amount, desc) {
+    document.getElementById('donar-amount-label').textContent = amount;
+    document.getElementById('donar-amount-hidden').value = amount + '/mes';
+    document.getElementById('donar-desc-label').textContent = desc;
+    showView('donar-form');
+  }
+
+  function printForm(elId) {
+    document.querySelectorAll('.print-target').forEach(function(el){ el.classList.remove('print-target'); });
+    var el = document.getElementById(elId);
+    if (el) el.classList.add('print-target');
+    window.print();
+  }
+
+  // ---------- Envío de formularios al panel mediante API del mismo origen ----------
+  // Página y panel comparten dominio y utilizan la API del mismo origen.
+  var API_BASE = "";
+
+  function enviarSolicitud(payload) {
+    return fetch(API_BASE + "/api/public/solicitudes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    });
+  }
+
+  function mostrarEstadoEnvio(elId, ok, msgOk, msgError) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = ok ? msgOk : msgError;
+    el.style.color = ok ? "var(--green)" : "#C0392B";
+  }
+
+  function enviarDonar() {
+    var nombre = document.getElementById('donar-nombre').value.trim();
+    var correo = document.getElementById('donar-correo').value.trim();
+    var telefono = document.getElementById('donar-tel').value.trim();
+    var pago = document.getElementById('donar-pago').value;
+    var mensaje = document.getElementById('donar-msg').value.trim();
+    var nivel = document.getElementById('donar-amount-hidden').value;
+
+    if (!nombre || !correo || !telefono || !pago) {
+      mostrarEstadoEnvio('donar-estado', false, '', 'Completa nombre, correo, teléfono y método de pago antes de enviar.');
+      return;
+    }
+
+    enviarSolicitud({
+      tipo: "apadrinamiento",
+      origen: "APP",
+      nombre: nombre,
+      correo: correo,
+      telefono: telefono,
+      "Nivel de apadrinamiento": nivel,
+      "Método de pago preferido": pago,
+      "Mensaje": mensaje
+    }).then(function(){
+      mostrarEstadoEnvio('donar-estado', true, '¡Gracias! Hemos recibido tu compromiso. Te escribiremos pronto para coordinar el pago.', '');
+    }).catch(function(){
+      mostrarEstadoEnvio('donar-estado', false, '', 'No pudimos enviar tu compromiso por este medio. Escríbenos por WhatsApp o a fundacorazonesenaccion@gmail.com y lo coordinamos directamente.');
+    });
+  }
+
+  function enviarVoluntario() {
+    var nombre = document.getElementById('vol-nombre').value.trim();
+    var correo = document.getElementById('vol-correo').value.trim();
+    var telefono = document.getElementById('vol-tel').value.trim();
+    var perfil = document.getElementById('vol-perfil').value;
+    var disp = document.getElementById('vol-disp').value;
+    var mensaje = document.getElementById('vol-msg').value.trim();
+
+    if (!nombre || !correo || !telefono || !perfil || !disp) {
+      mostrarEstadoEnvio('voluntario-estado', false, '', 'Completa nombre, correo, teléfono, perfil y disponibilidad antes de enviar.');
+      return;
+    }
+
+    enviarSolicitud({
+      tipo: "voluntariado",
+      origen: "APP",
+      nombre: nombre,
+      correo: correo,
+      telefono: telefono,
+      "Perfil de interés": perfil,
+      "Disponibilidad": disp,
+      "Mensaje": mensaje
+    }).then(function(){
+      mostrarEstadoEnvio('voluntario-estado', true, '¡Gracias por postularte! Te escribiremos pronto según tu perfil y disponibilidad.', '');
+    }).catch(function(){
+      mostrarEstadoEnvio('voluntario-estado', false, '', 'No pudimos enviar tu postulación por este medio. Escríbenos por WhatsApp o a fundacorazonesenaccion@gmail.com y lo coordinamos directamente.');
+    });
+  }
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(function(){});
+</script>
+
+</body>
+</html>
